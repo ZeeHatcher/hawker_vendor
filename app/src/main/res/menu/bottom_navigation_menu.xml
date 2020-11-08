@@ -6,12 +6,12 @@
         android:icon="@drawable/ic_baseline_assignment_24"
         android:title="@string/orders"/>
     <item
-        android:id="@+id/page_items"
+        android:id="@+id/page_manage"
         android:enabled="true"
         android:icon="@drawable/ic_baseline_fastfood_24"
         android:title="@string/manage"/>
     <item
-        android:id="@+id/page_stats"
+        android:id="@+id/page_settings"
         android:enabled="true"
         android:icon="@drawable/ic_baseline_settings_24"
         android:title="@string/settings"/>
