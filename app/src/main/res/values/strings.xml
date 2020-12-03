@@ -15,6 +15,12 @@
     <string name="settings">Settings</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="header_item">Item</string>
+    <string name="header_table">Table No.</string>
+    <string name="header_qty">Qty</string>
+    <string name="header_price">Price (RM)</string>
+
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>
