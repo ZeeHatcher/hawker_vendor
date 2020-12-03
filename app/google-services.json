@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "98195937512",
+    "project_id": "hawker-dd43a",
+    "storage_bucket": "hawker-dd43a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:98195937512:android:95797fa3c4b80317fa515d",
+        "android_client_info": {
+          "package_name": "com.example.hawker_vendor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "98195937512-ct6vqmutc8p8570vhh5hefc9tap1kllr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNTfQgeSTvbAWIMdbkw_fl-vd4cWVc24g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "98195937512-ct6vqmutc8p8570vhh5hefc9tap1kllr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
