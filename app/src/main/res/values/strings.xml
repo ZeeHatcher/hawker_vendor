@@ -13,8 +13,11 @@
     <string name="register">Register</string>
     <string name="setup">Setup</string>
     <string name="settings">Settings</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="error_email">Please enter an email with the correct format.</string>
+    <string name="error_email_empty">Please enter an email.</string>
+    <string name="error_password">Password must be at least 8 characters long.</string>
+    <string name="error_password_empty">Please enter a password.</string>
+    <string name="error_confirm">Password does not match.</string>
 
     <string name="header_item">Item</string>
     <string name="header_table">Table No.</string>
