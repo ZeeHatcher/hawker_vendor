@@ -14,6 +14,8 @@
     <string name="set_location">Set Location</string>
     <string name="setup">Setup</string>
     <string name="settings">Settings</string>
+    <string name="closed_message">Your stall is currently closed.</string>
+    <string name="open">Open for the day</string>
     <string name="error_email">Please enter an email with the correct format.</string>
     <string name="error_email_empty">Please enter an email.</string>
     <string name="error_password">Password must be at least 8 characters long.</string>
