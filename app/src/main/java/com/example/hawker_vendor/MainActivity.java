@@ -19,14 +19,20 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class MainActivity extends AppCompatActivity implements NavigationHost {
 
     private static String TAG = "Main";
+    private static String KEY_FRAGMENT = "fragment";
 
-    FirebaseAuth auth;
-    FirebaseFirestore db;
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+    private Fragment setupFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (savedInstanceState != null) {
+            setupFragment = getSupportFragmentManager().getFragment(savedInstanceState, KEY_FRAGMENT);
+        }
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -75,15 +81,13 @@ public class MainActivity extends AppCompatActivity implements NavigationHost {
                                     // Go to main app if already setup
                                     Log.d(TAG, "get hawker:exist");
 
-                                    Intent intent = new Intent(MainActivity.this, MainActivity2.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-                                    startActivity(intent);
+                                    goToApp();
                                 } else {
                                     // Go to setup page
                                     Log.d(TAG, "get hawker:not exist");
 
-                                    navigateTo(SetupFragment.newInstance(), false);
+                                    setupFragment = (setupFragment == null) ? SetupFragment.newInstance() : setupFragment;
+                                    navigateTo(setupFragment, false);
                                 }
                             } else {
                                 Log.w(TAG, "get hawker:failure", task.getException());
@@ -93,5 +97,19 @@ public class MainActivity extends AppCompatActivity implements NavigationHost {
         } else {
             navigateTo(LoginFragment.newInstance(), false);
         }
+    }
+
+    public void goToApp() {
+        Intent intent = new Intent(MainActivity.this, MainActivity2.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        startActivity(intent);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        getSupportFragmentManager().putFragment(outState, KEY_FRAGMENT, setupFragment);
     }
 }

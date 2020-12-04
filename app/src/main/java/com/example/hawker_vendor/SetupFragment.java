@@ -3,23 +3,46 @@ package com.example.hawker_vendor;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link SetupFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SetupFragment extends Fragment {
+public class SetupFragment extends Fragment implements View.OnClickListener {
+
+    private static final String TAG = "Setup";
+    private static final String KEY_ID = "storeId";
+    private static final String KEY_STORE_NAME = "storeName";
+    private static final String KEY_STALL_NAME = "stallName";
+    private static final int REQUEST_CODE = 1;
 
     private FirebaseAuth auth;
+    private FirebaseFirestore db;
+    private TextInputEditText etName, etStore;
+    private TextInputLayout tlName, tlStore;
+    private String storeId;
 
     public SetupFragment() {
         // Required empty public constructor
@@ -43,6 +66,7 @@ public class SetupFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -51,18 +75,79 @@ public class SetupFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_setup, container, false);
 
+        etName = view.findViewById(R.id.stall_name_edit_text);
+        etStore = view.findViewById(R.id.store_edit_text);
+
+        tlName = view.findViewById(R.id.stall_name_input_text);
+        tlStore = view.findViewById(R.id.store_input_text);
+
         Button buttonConfirm = view.findViewById(R.id.button_confirm);
 
-        buttonConfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                auth.signOut();
-//                Intent intent = new Intent(getActivity(), MainActivity2.class);
-//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                getActivity().startActivity(intent);
-            }
-        });
+        etStore.setOnClickListener(this);
+        buttonConfirm.setOnClickListener(this);
 
         return view;
+    }
+
+
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.store_edit_text:
+                Intent intent = new Intent(getActivity(), MapsActivity.class);
+                startActivityForResult(intent, REQUEST_CODE);
+                break;
+
+            case R.id.button_confirm:
+                boolean isValid = true;
+
+                tlName.setError(null);
+                tlStore.setError(null);
+
+                if (etName.getText().toString().isEmpty()) {
+                    tlName.setError(getString(R.string.error_stall_empty));
+                    isValid = false;
+                }
+
+                if (storeId == null) {
+                    tlStore.setError(getString(R.string.error_store_empty));
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                Map<String, Object> docData = new HashMap<>();
+                docData.put("storeId", storeId);
+                docData.put("name", etName.getText().toString());
+
+                db.collection("hawkers")
+                        .document(auth.getUid())
+                        .set(docData)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                ((MainActivity) getActivity()).goToApp();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "set hawker:failure", e);
+                            }
+                        });
+
+                break;
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            Log.d(TAG, "onActivityResult:success");
+
+            storeId = data.getStringExtra(MapsActivity.KEY_ID);
+            etStore.setText(data.getStringExtra(MapsActivity.KEY_NAME));
+        }
     }
 }

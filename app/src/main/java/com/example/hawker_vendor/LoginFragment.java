@@ -33,7 +33,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private static String TAG = "Login";
 
     private FirebaseAuth auth;
-    FirebaseFirestore db;
+    private FirebaseFirestore db;
     private TextInputEditText etEmail, etPassword;
     private TextInputLayout tlEmail, tlPassword;
 
