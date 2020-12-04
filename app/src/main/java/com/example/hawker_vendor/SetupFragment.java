@@ -120,6 +120,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 Map<String, Object> docData = new HashMap<>();
                 docData.put("storeId", storeId);
                 docData.put("name", etName.getText().toString());
+                docData.put("isOpen", false);
 
                 db.collection("hawkers")
                         .document(auth.getUid())
