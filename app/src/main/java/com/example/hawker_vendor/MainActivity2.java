@@ -2,54 +2,74 @@ package com.example.hawker_vendor;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager2.widget.ViewPager2;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MainActivity2 extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity2 extends AppCompatActivity implements NavigationHost, MaterialToolbar.OnMenuItemClickListener {
 
-    ViewPager2 viewPager;
-    MaterialToolbar appBar;
+    private static final String TAG = "Main2";
+    private MaterialToolbar appBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         appBar = findViewById(R.id.top_app_bar);
-        viewPager = findViewById(R.id.view_pager);
+        appBar.setOnMenuItemClickListener(this);
 
-        PagerAdapter pagerAdapter = new PagerAdapter(this);
-        viewPager.setUserInputEnabled(false);
-        viewPager.setAdapter(pagerAdapter);
-
-        bottomNavigationView.setOnNavigationItemSelectedListener(this);
-        bottomNavigationView.setSelectedItemId(R.id.page_orders);
+        navigateTo(PagerFragment.newInstance(), false);
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        appBar.setTitle(item.getTitle());
+    protected void onStart() {
+        super.onStart();
+    }
+
+    public void setAppBarTitle(CharSequence title) {
+        appBar.setTitle(title);
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        Log.d(TAG, "onMenuItemClick:" + item.getTitle());
 
         switch (item.getItemId()) {
-            case R.id.page_orders:
-                viewPager.setCurrentItem(0);
-                return true;
+            case R.id.logout:
+                break;
 
-            case R.id.page_manage:
-                viewPager.setCurrentItem(1);
-                return true;
+            case R.id.close:
+                break;
+        }
+        return false;
+    }
 
-            case R.id.page_settings:
-                viewPager.setCurrentItem(2);
-                return true;
+    @Override
+    public void navigateActivity() {
+
+    }
+
+    @Override
+    public void navigateTo(Fragment fragment, boolean addToBackStack) {
+        FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, fragment);
+
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
         }
 
-        return false;
+        transaction.commit();
+    }
+
+    @Override
+    public void pop() {
+        getSupportFragmentManager().popBackStack();
     }
 }
