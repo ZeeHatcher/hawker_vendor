@@ -20,8 +20,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
  */
 public class OrdersFragment extends Fragment implements View.OnClickListener {
 
-    private FirebaseFirestore db;
-
     public OrdersFragment() {
         // Required empty public constructor
     }
@@ -42,8 +40,6 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        db = FirebaseFirestore.getInstance();
     }
 
     @Override

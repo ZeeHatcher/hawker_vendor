@@ -14,6 +14,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -33,7 +35,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private static String TAG = "Login";
 
     private FirebaseAuth auth;
-    private FirebaseFirestore db;
     private TextInputEditText etEmail, etPassword;
     private TextInputLayout tlEmail, tlPassword;
 
@@ -55,7 +56,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         auth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -137,29 +137,28 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         if (currentUser != null) {
             // Check if hawker has already setup
-            db.collection("hawkers")
-                    .document(currentUser.getUid())
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            FirestoreHandler.getInstance()
+                    .getHawker(currentUser.getUid())
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            if (documentSnapshot.exists()) {
+                                Log.d(TAG, "get hawker:exist");
 
-                                if (document.exists()) {
-                                    // Go to main app if already setup
-                                    Log.d(TAG, "get hawker:exist");
-
-                                    ((NavigationHost) getContext()).navigateActivity();
-                                } else {
-                                    // Go to setup page
-                                    Log.d(TAG, "get hawker:not exist");
-
-                                    ((NavigationHost) getContext()).navigateTo(SetupFragment.newInstance(), false);
-                                }
+                                // Go to main app if already setup
+                                ((NavigationHost) getContext()).navigateActivity();
                             } else {
-                                Log.w(TAG, "get hawker:failure", task.getException());
+                                Log.d(TAG, "get hawker:not exist");
+
+                                // Go to setup page
+                                ((NavigationHost) getContext()).navigateTo(SetupFragment.newInstance(), false);
                             }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "get hawker:failure", e);
                         }
                     });
         }

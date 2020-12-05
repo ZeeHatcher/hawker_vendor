@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,7 +32,6 @@ public class SubFragment extends Fragment {
     private static final String TAG = "Sub";
 
     private FirebaseAuth auth;
-    private FirebaseFirestore db;
 
     public SubFragment() {
         // Required empty public constructor
@@ -55,7 +55,6 @@ public class SubFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         auth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -64,22 +63,23 @@ public class SubFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_sub, container, false);
 
-        db.collection("hawkers")
-                .document(auth.getCurrentUser().getUid())
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        FirestoreHandler.getInstance()
+                .getHawker(auth.getCurrentUser().getUid())
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            Log.w(TAG, "get hawker:success", task.getException());
-                            DocumentSnapshot document = task.getResult();
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-                            boolean isOpen = document.get("isOpen", Boolean.class);
+                        Log.w(TAG, "get hawker:success");
 
-                            replaceFragment(isOpen);
-                        } else {
-                            Log.w(TAG, "get hawker:failure", task.getException());
-                        }
+                        boolean isOpen = documentSnapshot.get("isOpen", Boolean.class);
+
+                        replaceFragment(isOpen);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "get hawker:failure", e);
                     }
                 });
 
@@ -90,9 +90,8 @@ public class SubFragment extends Fragment {
         Map<String, Object> docData = new HashMap<>();
         docData.put("isOpen", isOpen);
 
-        db.collection("hawkers")
-                .document(auth.getCurrentUser().getUid())
-                .update(docData)
+        FirestoreHandler.getInstance()
+                .updateHawker(auth.getCurrentUser().getUid(), docData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

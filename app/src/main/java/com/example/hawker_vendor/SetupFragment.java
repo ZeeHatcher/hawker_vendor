@@ -36,7 +36,6 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
     private static final int REQUEST_CODE = 1;
 
     private FirebaseAuth auth;
-    private FirebaseFirestore db;
     private TextInputEditText etName, etStore;
     private TextInputLayout tlName, tlStore;
     private String storeId;
@@ -63,7 +62,6 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         auth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -119,9 +117,8 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 docData.put("name", etName.getText().toString());
                 docData.put("isOpen", false);
 
-                db.collection("hawkers")
-                        .document(auth.getCurrentUser().getUid())
-                        .set(docData)
+                FirestoreHandler.getInstance()
+                        .setHawker(auth.getCurrentUser().getUid(), docData)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
