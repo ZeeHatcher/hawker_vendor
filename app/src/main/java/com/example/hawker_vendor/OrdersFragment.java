@@ -1,5 +1,6 @@
 package com.example.hawker_vendor;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,7 +8,9 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
@@ -15,7 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
  * Use the {@link OrdersFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class OrdersFragment extends Fragment {
+public class OrdersFragment extends Fragment implements View.OnClickListener {
 
     private FirebaseFirestore db;
 
@@ -29,7 +32,6 @@ public class OrdersFragment extends Fragment {
      *
      * @return A new instance of fragment OrdersFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static OrdersFragment newInstance() {
         OrdersFragment fragment = new OrdersFragment();
         Bundle args = new Bundle();
@@ -48,6 +50,32 @@ public class OrdersFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_closed, container, false);
+        View view = inflater.inflate(R.layout.fragment_orders, container, false);
+
+        Button buttonClose = view.findViewById(R.id.button_close);
+
+        buttonClose.setOnClickListener(this);
+
+        return view;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.button_close:
+                new MaterialAlertDialogBuilder(getContext())
+                        .setTitle(R.string.dialog_close_title)
+                        .setMessage(R.string.dialog_close_message)
+                        .setPositiveButton(R.string.dialog_close_yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ((SubFragment) getParentFragment()).replaceFragment(ClosedFragment.newInstance());
+                            }
+                        })
+                        .setNegativeButton(R.string.dialog_close_no, null)
+                        .show();
+
+                break;
+        }
     }
 }

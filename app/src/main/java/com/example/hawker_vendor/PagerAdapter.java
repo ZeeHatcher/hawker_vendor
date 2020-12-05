@@ -18,13 +18,13 @@ public class PagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 1:
-                return new ManageFragment();
+                return ManageFragment.newInstance();
 
             case 2:
-                return new SettingsFragment();
+                return SettingsFragment.newInstance();
 
             default:
-                return new OrdersFragment();
+                return SubFragment.newInstance();
         }
     }
 

@@ -7,13 +7,22 @@
     android:padding="12dp"
     tools:context=".OrdersFragment">
 
+    <Button
+        android:id="@+id/button_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/close"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="6dp"
         android:background="@drawable/border"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/button_close">
 
         <TextView
             android:id="@+id/header_item"

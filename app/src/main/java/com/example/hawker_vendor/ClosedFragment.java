@@ -7,15 +7,16 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link SettingsFragment#newInstance} factory method to
+ * Use the {@link ClosedFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SettingsFragment extends Fragment {
+public class ClosedFragment extends Fragment implements View.OnClickListener {
 
-    public SettingsFragment() {
+    public ClosedFragment() {
         // Required empty public constructor
     }
 
@@ -23,10 +24,10 @@ public class SettingsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment SettingsFragment.
+     * @return A new instance of fragment ClosedFragment.
      */
-    public static SettingsFragment newInstance() {
-        SettingsFragment fragment = new SettingsFragment();
+    public static ClosedFragment newInstance() {
+        ClosedFragment fragment = new ClosedFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -41,6 +42,22 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        View view = inflater.inflate(R.layout.fragment_closed, container, false);
+
+        Button buttonOpen = view.findViewById(R.id.button_open);
+
+        buttonOpen.setOnClickListener(this);
+
+        return view;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.button_open:
+                ((SubFragment) getParentFragment()).replaceFragment(OrdersFragment.newInstance());
+
+                break;
+        }
     }
 }

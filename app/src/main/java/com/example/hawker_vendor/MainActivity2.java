@@ -1,6 +1,5 @@
 package com.example.hawker_vendor;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -15,7 +14,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity2 extends AppCompatActivity implements NavigationHost, MaterialToolbar.OnMenuItemClickListener {
+public class MainActivity2 extends AppCompatActivity implements NavigationHost, WidgetManager, MaterialToolbar.OnMenuItemClickListener {
 
     private static final String TAG = "Main2";
 
@@ -32,8 +31,6 @@ public class MainActivity2 extends AppCompatActivity implements NavigationHost, 
         appBar = findViewById(R.id.top_app_bar);
         appBar.setOnMenuItemClickListener(this);
 
-        appBar.getMenu().findItem(R.id.close).setVisible(false);
-
         navigateTo(PagerFragment.newInstance(), false);
     }
 
@@ -44,8 +41,6 @@ public class MainActivity2 extends AppCompatActivity implements NavigationHost, 
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        Log.d(TAG, "onMenuItemClick:" + item.getTitle());
-
         switch (item.getItemId()) {
             case R.id.logout:
                 new MaterialAlertDialogBuilder(this)
@@ -59,20 +54,6 @@ public class MainActivity2 extends AppCompatActivity implements NavigationHost, 
                             }
                         })
                         .setNegativeButton(R.string.dialog_logout_no, null)
-                        .show();
-
-                break;
-
-            case R.id.close:
-                new MaterialAlertDialogBuilder(this)
-                        .setTitle(R.string.dialog_close_title)
-                        .setMessage(R.string.dialog_close_message)
-                        .setPositiveButton(R.string.dialog_close_yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                            }
-                        })
-                        .setNegativeButton(R.string.dialog_close_no, null)
                         .show();
 
                 break;
@@ -109,5 +90,10 @@ public class MainActivity2 extends AppCompatActivity implements NavigationHost, 
 
     public void setAppBarTitle(CharSequence title) {
         appBar.setTitle(title);
+    }
+
+    @Override
+    public void setMenuItemVisible(int id, boolean isVisible) {
+        appBar.getMenu().findItem(id).setVisible(isVisible);
     }
 }

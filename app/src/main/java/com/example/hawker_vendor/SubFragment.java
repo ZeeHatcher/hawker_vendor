@@ -10,12 +10,12 @@ import android.view.ViewGroup;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link SettingsFragment#newInstance} factory method to
+ * Use the {@link SubFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SettingsFragment extends Fragment {
+public class SubFragment extends Fragment {
 
-    public SettingsFragment() {
+    public SubFragment() {
         // Required empty public constructor
     }
 
@@ -23,10 +23,10 @@ public class SettingsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment SettingsFragment.
+     * @return A new instance of fragment SubFragment.
      */
-    public static SettingsFragment newInstance() {
-        SettingsFragment fragment = new SettingsFragment();
+    public static SubFragment newInstance() {
+        SubFragment fragment = new SubFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -41,6 +41,17 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        View view = inflater.inflate(R.layout.fragment_sub, container, false);
+
+        replaceFragment(ClosedFragment.newInstance());
+
+        return view;
+    }
+
+    public void replaceFragment(Fragment fragment) {
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.subcontainer, fragment)
+                .commit();
     }
 }
