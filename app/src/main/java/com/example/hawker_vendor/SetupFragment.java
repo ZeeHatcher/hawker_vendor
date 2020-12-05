@@ -120,7 +120,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 docData.put("isOpen", false);
 
                 db.collection("hawkers")
-                        .document(auth.getUid())
+                        .document(auth.getCurrentUser().getUid())
                         .set(docData)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override

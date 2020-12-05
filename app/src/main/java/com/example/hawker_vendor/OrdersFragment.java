@@ -69,7 +69,7 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
                         .setPositiveButton(R.string.dialog_close_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                ((SubFragment) getParentFragment()).replaceFragment(ClosedFragment.newInstance());
+                                ((SubFragment) getParentFragment()).setStallOpen(false);
                             }
                         })
                         .setNegativeButton(R.string.dialog_close_no, null)

@@ -1,5 +1,6 @@
 package com.example.hawker_vendor;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -10,9 +11,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity2 extends AppCompatActivity implements NavigationHost, WidgetManager, MaterialToolbar.OnMenuItemClickListener {
 
@@ -37,6 +43,12 @@ public class MainActivity2 extends AppCompatActivity implements NavigationHost, 
     @Override
     protected void onStart() {
         super.onStart();
+
+        FirebaseUser currentUser = auth.getCurrentUser();
+
+        if (currentUser == null) {
+            navigateActivity();
+        }
     }
 
     @Override

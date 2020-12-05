@@ -2,11 +2,24 @@ package com.example.hawker_vendor;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -14,6 +27,11 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class SubFragment extends Fragment {
+
+    private static final String TAG = "Sub";
+
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
 
     public SubFragment() {
         // Required empty public constructor
@@ -35,6 +53,9 @@ public class SubFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -43,15 +64,53 @@ public class SubFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_sub, container, false);
 
-        replaceFragment(ClosedFragment.newInstance());
+        db.collection("hawkers")
+                .document(auth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Log.w(TAG, "get hawker:success", task.getException());
+                            DocumentSnapshot document = task.getResult();
+
+                            boolean isOpen = document.get("isOpen", Boolean.class);
+
+                            replaceFragment(isOpen);
+                        } else {
+                            Log.w(TAG, "get hawker:failure", task.getException());
+                        }
+                    }
+                });
 
         return view;
     }
 
-    public void replaceFragment(Fragment fragment) {
+    public void setStallOpen(final boolean isOpen) {
+        Map<String, Object> docData = new HashMap<>();
+        docData.put("isOpen", isOpen);
+
+        db.collection("hawkers")
+                .document(auth.getCurrentUser().getUid())
+                .update(docData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        replaceFragment(isOpen);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "update hawker:failure", e);
+                    }
+                });
+    }
+
+    private void replaceFragment(boolean isOpen) {
         getChildFragmentManager()
                 .beginTransaction()
-                .replace(R.id.subcontainer, fragment)
+                .replace(R.id.subcontainer, (isOpen) ? OrdersFragment.newInstance() : ClosedFragment.newInstance())
                 .commit();
     }
 }
