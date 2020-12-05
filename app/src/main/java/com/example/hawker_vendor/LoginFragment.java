@@ -80,6 +80,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        checkHawkerIsSetup();
+    }
+
+    @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_login:
@@ -107,7 +114,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                                 if (task.isSuccessful()) {
                                     Log.d(TAG, "signInWithEmailAndPassword:success");
 
-                                    ((MainActivity) getActivity()).checkHawkerIsSetup();
+                                    checkHawkerIsSetup();
                                 } else {
                                     Log.w(TAG, "signInWithEmailAndPassword:failure", task.getException());
 
@@ -120,8 +127,41 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.button_register:
-                ((NavigationHost) getActivity()).navigateTo(RegisterFragment.newInstance(), true);
+                ((NavigationHost) getContext()).navigateTo(RegisterFragment.newInstance(), true);
                 break;
+        }
+    }
+
+    private void checkHawkerIsSetup() {
+        FirebaseUser currentUser = auth.getCurrentUser();
+
+        if (currentUser != null) {
+            // Check if hawker has already setup
+            db.collection("hawkers")
+                    .document(currentUser.getUid())
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+
+                                if (document.exists()) {
+                                    // Go to main app if already setup
+                                    Log.d(TAG, "get hawker:exist");
+
+                                    ((NavigationHost) getContext()).navigateActivity();
+                                } else {
+                                    // Go to setup page
+                                    Log.d(TAG, "get hawker:not exist");
+
+                                    ((NavigationHost) getContext()).navigateTo(SetupFragment.newInstance(), false);
+                                }
+                            } else {
+                                Log.w(TAG, "get hawker:failure", task.getException());
+                            }
+                        }
+                    });
         }
     }
 }

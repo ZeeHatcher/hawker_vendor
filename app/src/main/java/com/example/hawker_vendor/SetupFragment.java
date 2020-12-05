@@ -33,9 +33,6 @@ import static android.app.Activity.RESULT_OK;
 public class SetupFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "Setup";
-    private static final String KEY_ID = "storeId";
-    private static final String KEY_STORE_NAME = "storeName";
-    private static final String KEY_STALL_NAME = "stallName";
     private static final int REQUEST_CODE = 1;
 
     private FirebaseAuth auth;
@@ -128,7 +125,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                ((MainActivity) getActivity()).goToApp();
+                                ((NavigationHost) getContext()).navigateActivity();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
