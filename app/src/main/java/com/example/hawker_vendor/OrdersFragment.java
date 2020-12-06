@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
@@ -19,6 +20,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
  * create an instance of this fragment.
  */
 public class OrdersFragment extends Fragment implements View.OnClickListener {
+
+    private FirebaseDatabase db;
+    private OrdersAdapter adapter;
 
     public OrdersFragment() {
         // Required empty public constructor
@@ -40,6 +44,8 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        db = FirebaseDatabase.getInstance();
     }
 
     @Override

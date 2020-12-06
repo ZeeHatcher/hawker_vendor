@@ -24,7 +24,6 @@ public class ItemsAdapter extends FirestoreRecyclerAdapter<Item, ItemsAdapter.It
 
     private static final String TAG = "ItemsAdapter";
 
-    private ArrayList<Item> items;
     private Context context;
     private FirebaseStorage storage;
 
@@ -57,15 +56,17 @@ public class ItemsAdapter extends FirestoreRecyclerAdapter<Item, ItemsAdapter.It
         holder.dailyStock.setText("Daily Stock: " + model.getDailyStock());
         holder.currentStock.setText("Current Stock: " + model.getCurrentStock());
 
-        StorageReference storageReference = storage.getReference(model.getImagePath());
-        Glide.with(context)
+        StorageReference storageReference = storage.getReference().child(model.getImagePath());
+        GlideApp.with(context)
                 .load(storageReference)
                 .into(holder.image);
 
         holder.buttonEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "onClick:" + model.getName());
+                Log.d(TAG, "onClick edit: " + model.toString());
+
+                ((NavigationHost) context).navigateTo(FormFragment.newInstance(model), true);
             }
         });
     }

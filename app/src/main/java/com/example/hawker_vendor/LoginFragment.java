@@ -95,6 +95,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 String email = etEmail.getText().toString();
                 String password = etPassword.getText().toString();
 
+                tlEmail.setError(null);
+                tlPassword.setError(null);
+
                 if (email.isEmpty()) {
                     tlEmail.setError(getString(R.string.error_email_empty));
                     isValid = false;

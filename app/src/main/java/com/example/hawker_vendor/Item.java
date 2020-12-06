@@ -1,24 +1,39 @@
 package com.example.hawker_vendor;
 
 import android.content.Intent;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 
-public class Item {
+import java.util.HashMap;
+import java.util.Map;
+
+public class Item implements Parcelable {
     private String id, name, imagePath;
     private float price;
     private int dailyStock, currentStock;
 
-    public static Item fromDocument(DocumentSnapshot doc) {
-        return new Item(
-                doc.getId(),
-                doc.get("name", String.class),
-                doc.get("imagePath", String.class),
-                doc.get("price", Float.class),
-                doc.get("dailyStock", Integer.class),
-                doc.get("currentStock", Integer.class)
-        );
+    protected Item(Parcel in) {
+        id = in.readString();
+        name = in.readString();
+        imagePath = in.readString();
+        price = in.readFloat();
+        dailyStock = in.readInt();
+        currentStock = in.readInt();
     }
+
+    public static final Creator<Item> CREATOR = new Creator<Item>() {
+        @Override
+        public Item createFromParcel(Parcel in) {
+            return new Item(in);
+        }
+
+        @Override
+        public Item[] newArray(int size) {
+            return new Item[size];
+        }
+    };
 
     public Item() {}
 
@@ -79,6 +94,18 @@ public class Item {
         this.currentStock = currentStock;
     }
 
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("name", name);
+        map.put("price", price);
+        map.put("imagePath", imagePath);
+        map.put("dailyStock", dailyStock);
+        map.put("currentStock", currentStock);
+
+        return map;
+    }
+
     @Override
     public String toString() {
         return "Item{" +
@@ -89,5 +116,20 @@ public class Item {
                 ", dailyStock=" + dailyStock +
                 ", currentStock=" + currentStock +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(name);
+        parcel.writeString(imagePath);
+        parcel.writeFloat(price);
+        parcel.writeInt(dailyStock);
+        parcel.writeInt(currentStock);
     }
 }

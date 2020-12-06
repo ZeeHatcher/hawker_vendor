@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.firebase.ui.firestore.SnapshotParser;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -78,10 +79,19 @@ public class ManageFragment extends Fragment implements View.OnClickListener {
         FloatingActionButton buttonAdd = view.findViewById(R.id.button_add);
         recyclerView = view.findViewById(R.id.recycler_view);
 
-        Query query = handler.queryHawkerItems(auth.getCurrentUser().getUid());
+        Query query = handler.refHawkerItems(auth.getCurrentUser().getUid());
 
         FirestoreRecyclerOptions<Item> options = new FirestoreRecyclerOptions.Builder<Item>()
-                .setQuery(query, Item.class)
+                .setQuery(query, new SnapshotParser<Item>() {
+                    @NonNull
+                    @Override
+                    public Item parseSnapshot(@NonNull DocumentSnapshot snapshot) {
+                        Item item = snapshot.toObject(Item.class);
+                        item.setId(snapshot.getId());
+
+                        return item;
+                    }
+                })
                 .build();
 
         adapter = new ItemsAdapter(options);
@@ -97,16 +107,23 @@ public class ManageFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
+
         adapter.startListening();
     }
 
     @Override
     public void onStop() {
         super.onStop();
+
         adapter.stopListening();
     }
 
     @Override
     public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.button_add:
+                ((NavigationHost) getContext()).navigateTo(FormFragment.newInstance(null), true);
+                break;
+        }
     }
 }
