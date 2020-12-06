@@ -146,7 +146,7 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_cancel:
-                ((NavigationHost) getContext()).pop();
+                leave();
 
                 break;
 
@@ -156,6 +156,7 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
                 if (!isEdit) item = new Item();
 
                 item.setName(etName.getText().toString());
+                item.setHawkerId(auth.getCurrentUser().getUid());
                 item.setPrice(Float.parseFloat(etPrice.getText().toString()));
                 item.setDailyStock(Integer.valueOf(etStock.getText().toString()));
 
@@ -174,11 +175,21 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
                         .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
+                                storage.getReference()
+                                        .child(item.getImagePath())
+                                        .delete()
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w(TAG, "delete hawker item image:failure", e);
+                                            }
+                                        });
+
                                 handler.deleteHawkerItem(auth.getCurrentUser().getUid(), item.getId())
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
-                                                ((NavigationHost) getContext()).pop();
+                                                leave();
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
@@ -287,7 +298,7 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            ((NavigationHost) getContext()).pop();
+                            leave();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -301,7 +312,7 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
                         public void onSuccess(DocumentReference documentReference) {
-                            ((NavigationHost) getContext()).pop();
+                            leave();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -311,5 +322,9 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
                         }
                     });
         }
+    }
+
+    private void leave() {
+        ((NavigationHost) getContext()).pop();
     }
 }
