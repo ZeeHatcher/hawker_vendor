@@ -3,16 +3,25 @@ package com.example.hawker_vendor;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.firebase.ui.database.SnapshotParser;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.database.Query;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,7 +30,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
  */
 public class OrdersFragment extends Fragment implements View.OnClickListener {
 
-    private FirebaseDatabase db;
+    private FirebaseAuth auth;
+    private FirebaseHandler handler;
     private OrdersAdapter adapter;
 
     public OrdersFragment() {
@@ -45,7 +55,8 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        db = FirebaseDatabase.getInstance();
+        auth = FirebaseAuth.getInstance();
+        handler = FirebaseHandler.getInstance();
     }
 
     @Override
@@ -55,10 +66,45 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_orders, container, false);
 
         Button buttonClose = view.findViewById(R.id.button_close);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+
+        Query query = handler.getOrders(auth.getCurrentUser().getUid());
+
+        FirebaseRecyclerOptions<Order> options = new FirebaseRecyclerOptions.Builder<Order>()
+                .setQuery(query, new SnapshotParser<Order>() {
+                    @NonNull
+                    @Override
+                    public Order parseSnapshot(@NonNull DataSnapshot snapshot) {
+                        Order order = snapshot.getValue(Order.class);
+                        order.setId(snapshot.getKey());
+
+                        return order;
+                    }
+                })
+                .build();
+
+        adapter = new OrdersAdapter(options);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.setAdapter(adapter);
 
         buttonClose.setOnClickListener(this);
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        adapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        adapter.stopListening();
     }
 
     @Override
