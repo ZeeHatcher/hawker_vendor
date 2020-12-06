@@ -3,6 +3,7 @@ package com.example.hawker_vendor;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Map;
@@ -23,6 +24,12 @@ public class FirestoreHandler {
     private FirestoreHandler() {
     }
 
+    public Query queryHawkerItems(String uid) {
+        return db.collection(COL_HAWKERS)
+                .document(uid)
+                .collection(COL_ITEMS);
+    }
+
     public Task<Void> setHawker(String uid, Map<String, Object> data) {
         return db.collection(COL_HAWKERS)
                 .document(uid)
@@ -32,13 +39,6 @@ public class FirestoreHandler {
     public Task<DocumentSnapshot> getHawker(String uid) {
         return db.collection(COL_HAWKERS)
                 .document(uid)
-                .get();
-    }
-
-    public Task<QuerySnapshot> getHawkerItems(String uid) {
-        return db.collection(COL_HAWKERS)
-                .document(uid)
-                .collection(COL_ITEMS)
                 .get();
     }
 

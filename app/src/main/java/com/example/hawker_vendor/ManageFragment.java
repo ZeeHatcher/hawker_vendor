@@ -13,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,6 +23,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -37,6 +40,7 @@ public class ManageFragment extends Fragment implements View.OnClickListener {
     private final ArrayList<Item> items = new ArrayList<>();
 
     private FirebaseAuth auth;
+    private FirestoreHandler handler;
     private ItemsAdapter adapter;
     private RecyclerView recyclerView;
 
@@ -50,7 +54,6 @@ public class ManageFragment extends Fragment implements View.OnClickListener {
      *
      * @return A new instance of fragment ManageFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static ManageFragment newInstance() {
         ManageFragment fragment = new ManageFragment();
         Bundle args = new Bundle();
@@ -63,47 +66,44 @@ public class ManageFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         auth = FirebaseAuth.getInstance();
+        handler = FirestoreHandler.getInstance();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView");
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_manage, container, false);
 
         FloatingActionButton buttonAdd = view.findViewById(R.id.button_add);
         recyclerView = view.findViewById(R.id.recycler_view);
 
-        adapter = new ItemsAdapter(items);
+        Query query = handler.queryHawkerItems(auth.getCurrentUser().getUid());
+
+        FirestoreRecyclerOptions<Item> options = new FirestoreRecyclerOptions.Builder<Item>()
+                .setQuery(query, Item.class)
+                .build();
+
+        adapter = new ItemsAdapter(options);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(adapter);
 
-        FirestoreHandler.getInstance()
-                .getHawkerItems(auth.getCurrentUser().getUid())
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        Log.d(TAG, "get hawker items:success");
-
-                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                            items.add(Item.fromDocument(document));
-                        }
-
-                        adapter.notifyDataSetChanged();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "get hawker items:failure", e);
-                    }
-                });
-
         buttonAdd.setOnClickListener(this);
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        adapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        adapter.stopListening();
     }
 
     @Override
