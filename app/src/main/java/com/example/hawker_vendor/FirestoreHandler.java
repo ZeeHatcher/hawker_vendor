@@ -5,6 +5,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Map;
 
@@ -22,12 +23,6 @@ public class FirestoreHandler {
     }
 
     private FirestoreHandler() {
-    }
-
-    public CollectionReference refHawkerItems(String uid) {
-        return db.collection(COL_HAWKERS)
-                .document(uid)
-                .collection(COL_ITEMS);
     }
 
     public DocumentReference refHawker(String uid) {
@@ -73,5 +68,16 @@ public class FirestoreHandler {
     public Task<Void> deleteHawkerItem(String uid, String itemId) {
         return refHawkerItem(uid, itemId)
                 .delete();
+    }
+
+    public CollectionReference refHawkerItems(String uid) {
+        return db.collection(COL_HAWKERS)
+                .document(uid)
+                .collection(COL_ITEMS);
+    }
+
+    public Task<QuerySnapshot> getHawkerItems(String uid) {
+        return refHawkerItems(uid)
+                .get();
     }
 }

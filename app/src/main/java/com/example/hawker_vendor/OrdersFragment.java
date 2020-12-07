@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +17,19 @@ import android.widget.Button;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,8 +38,10 @@ import com.google.firebase.database.Query;
  */
 public class OrdersFragment extends Fragment implements View.OnClickListener {
 
+    private static final String TAG = "Orders";
     private FirebaseAuth auth;
-    private FirebaseHandler handler;
+    private FirebaseHandler firebaseHandler;
+    private FirestoreHandler firestoreHandler;
     private OrdersAdapter adapter;
 
     public OrdersFragment() {
@@ -56,7 +66,8 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         auth = FirebaseAuth.getInstance();
-        handler = FirebaseHandler.getInstance();
+        firebaseHandler = FirebaseHandler.getInstance();
+        firestoreHandler = FirestoreHandler.getInstance();
     }
 
     @Override
@@ -68,7 +79,7 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
         Button buttonClose = view.findViewById(R.id.button_close);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
 
-        Query query = handler.getOrders(auth.getCurrentUser().getUid());
+        Query query = firebaseHandler.getOrders(auth.getCurrentUser().getUid());
 
         FirebaseRecyclerOptions<Order> options = new FirebaseRecyclerOptions.Builder<Order>()
                 .setQuery(query, new SnapshotParser<Order>() {
@@ -118,6 +129,9 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 ((SubFragment) getParentFragment()).setStallOpen(false);
+
+                                deleteOrders();
+                                restock();
                             }
                         })
                         .setNegativeButton(R.string.dialog_close_no, null)
@@ -125,5 +139,46 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
 
                 break;
         }
+    }
+
+    private void deleteOrders() {
+        firebaseHandler.getOrders(auth.getCurrentUser().getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot s : snapshot.getChildren()) {
+                            Log.d(TAG, "onDataChange:" + s.getKey());
+
+                            s.getRef().removeValue();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e(TAG, "onCancelled", error.toException());
+                    }
+                });
+    }
+
+    private void restock() {
+        firestoreHandler.getHawkerItems(auth.getCurrentUser().getUid())
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
+                            Map<String, Object> dataDoc = new HashMap<>();
+                            dataDoc.put("currentStock", snapshot.get("dailyStock", Integer.class));
+
+                            snapshot.getReference()
+                                    .update(dataDoc);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "get hawker items:fail", e);
+                    }
+                });
     }
 }
