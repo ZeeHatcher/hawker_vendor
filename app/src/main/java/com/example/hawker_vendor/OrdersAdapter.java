@@ -14,14 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class OrdersAdapter extends FirebaseRecyclerAdapter<Order, OrdersAdapter.OrderViewHolder> {
 
     private static final String TAG = "OrdersAdapter";
-    private FirebaseHandler handler;
+    private FirebaseAuth auth = FirebaseAuth.getInstance();
+    private FirebaseHandler firebaseHandler = FirebaseHandler.getInstance();
+    private FirestoreHandler firestoreHandler = FirestoreHandler.getInstance();
     private Context context;
 
     /**
@@ -56,13 +57,14 @@ public class OrdersAdapter extends FirebaseRecyclerAdapter<Order, OrdersAdapter.
                                 .setPositiveButton(R.string.complete, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        handler.setOrderCompletion(model.getId(), 0);
+                                        firebaseHandler.setOrderCompletion(model.getId(), 0);
                                     }
                                 })
                                 .setNegativeButton(R.string.reject, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        handler.setOrderCompletion(model.getId(), 1);
+                                        firebaseHandler.setOrderCompletion(model.getId(), 1);
+                                        firestoreHandler.incrementItemQuantity(auth.getCurrentUser().getUid(), model.getItemId(), model.getItemQty());
                                     }
                                 })
                                 .setNeutralButton(R.string.cancel, null)
@@ -88,7 +90,6 @@ public class OrdersAdapter extends FirebaseRecyclerAdapter<Order, OrdersAdapter.
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        handler = FirebaseHandler.getInstance();
         context = parent.getContext();
         View view = LayoutInflater.from(context).inflate(R.layout.row_order, parent, false);
 

@@ -1,7 +1,7 @@
 package com.example.hawker_vendor;
 
 public class Order {
-    private String id, itemName, tableNo;
+    private String id, itemId, itemName, tableNo;
     private float total;
     private int itemQty, completion;
 
@@ -14,6 +14,14 @@ public class Order {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
     }
 
     public String getItemName() {
@@ -60,6 +68,7 @@ public class Order {
     public String toString() {
         return "Order{" +
                 "id='" + id + '\'' +
+                ", itemId='" + itemId + '\'' +
                 ", itemName='" + itemName + '\'' +
                 ", tableNo='" + tableNo + '\'' +
                 ", total=" + total +
@@ -67,4 +76,5 @@ public class Order {
                 ", completion=" + completion +
                 '}';
     }
+
 }

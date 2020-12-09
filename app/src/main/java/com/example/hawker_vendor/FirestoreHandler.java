@@ -4,6 +4,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -15,6 +16,7 @@ public class FirestoreHandler {
 
     private static final String COL_HAWKERS = "hawkers";
     private static final String COL_ITEMS = "items";
+    private static final String KEY_CURRENT_STOCK = "currentStock";
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -63,6 +65,14 @@ public class FirestoreHandler {
     public Task<Void> updateHawkerItem(String uid, String itemId, Map<String, Object> data) {
         return refHawkerItem(uid, itemId)
                 .update(data);
+    }
+
+    public Task<Void> incrementItemQuantity(String uid, String itemId, int qty) {
+        return db.collection(COL_HAWKERS)
+                .document(uid)
+                .collection(COL_ITEMS)
+                .document(itemId)
+                .update(KEY_CURRENT_STOCK, FieldValue.increment(qty));
     }
 
     public Task<Void> deleteHawkerItem(String uid, String itemId) {

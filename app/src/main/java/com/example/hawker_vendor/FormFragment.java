@@ -155,10 +155,14 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
 
                 if (!isEdit) item = new Item();
 
+                Float price = Float.parseFloat(etPrice.getText().toString());
+                int stock = Integer.valueOf(etStock.getText().toString());
+
                 item.setName(etName.getText().toString());
                 item.setHawkerId(auth.getCurrentUser().getUid());
-                item.setPrice(Float.parseFloat(etPrice.getText().toString()));
-                item.setDailyStock(Integer.valueOf(etStock.getText().toString()));
+                item.setPrice(price);
+                item.setDailyStock(stock);
+                item.setCurrentStock(stock);
 
                 if (imageUri != null) {
                     uploadImage();
