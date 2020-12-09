@@ -25,6 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -54,7 +55,7 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
 
     private ImageView image;
     private TextInputLayout tlName;
-    private EditText etName, etPrice, etStock;
+    private EditText etName, etPrice, etStock, etTime;
 
     public FormFragment() {
         // Required empty public constructor
@@ -100,6 +101,7 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
         etName = view.findViewById(R.id.name_edit_text);
         etPrice = view.findViewById(R.id.price);
         etStock = view.findViewById(R.id.daily_stock);
+        etTime = view.findViewById(R.id.average_prep_time);
 
         Button buttonCancel = view.findViewById(R.id.button_cancel);
         Button buttonDone = view.findViewById(R.id.button_done);
@@ -109,6 +111,7 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
             etName.setText(item.getName());
             etPrice.setText(String.format("%.2f", item.getPrice()));
             etStock.setText(String.valueOf(item.getDailyStock()));
+            etTime.setText(String.valueOf(item.getPrepTime()));
 
             StorageReference storageReference = storage.getReference(item.getImagePath());
             GlideApp.with(getContext())
@@ -155,20 +158,36 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
 
                 if (!isEdit) item = new Item();
 
-                Float price = Float.parseFloat(etPrice.getText().toString());
-                int stock = Integer.valueOf(etStock.getText().toString());
+                float price = Float.parseFloat(etPrice.getText().toString());
+                float prepTime = Float.parseFloat(etTime.getText().toString());
+                int stock = Integer.parseInt(etStock.getText().toString());
 
                 item.setName(etName.getText().toString());
                 item.setHawkerId(auth.getCurrentUser().getUid());
                 item.setPrice(price);
+                item.setPrepTime(prepTime);
                 item.setDailyStock(stock);
                 item.setCurrentStock(stock);
 
-                if (imageUri != null) {
-                    uploadImage();
-                } else {
-                    commitToFirestore();
-                }
+                handler.getHawker(auth.getCurrentUser().getUid())
+                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                item.setHawkerName(documentSnapshot.get("name", String.class));
+
+                                if (imageUri != null) {
+                                    uploadImage();
+                                } else {
+                                    commitToFirestore();
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "get hawker:failure", e);
+                            }
+                        });
 
                 break;
 
@@ -240,6 +259,7 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
         String name = etName.getText().toString();
         String price = etPrice.getText().toString();
         String stock = etStock.getText().toString();
+        String prepTime = etTime.getText().toString();
 
         tlName.setError(null);
 
@@ -255,6 +275,11 @@ public class FormFragment extends Fragment implements View.OnClickListener, View
 
         if (stock.isEmpty()) {
             etStock.setError(getString(R.string.error_field_empty));
+            isValid = false;
+        }
+
+        if (prepTime.isEmpty()) {
+            etTime.setError(getString(R.string.error_field_empty));
             isValid = false;
         }
 

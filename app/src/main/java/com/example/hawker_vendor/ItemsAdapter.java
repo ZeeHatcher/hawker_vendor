@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -55,11 +56,14 @@ public class ItemsAdapter extends FirestoreRecyclerAdapter<Item, ItemsAdapter.It
         holder.price.setText(String.format("RM%.2f", model.getPrice()));
         holder.dailyStock.setText("Daily Stock: " + model.getDailyStock());
         holder.currentStock.setText("Current Stock: " + model.getCurrentStock());
+        holder.currentStock.setTextColor(ContextCompat.getColor(context, (model.getCurrentStock() == 0) ? R.color.colorNegative : R.color.colorTextSecondary));
+        holder.prepTime.setText("Prep Time: " + model.getPrepTime() + " min(s)");
 
         StorageReference storageReference = storage.getReference().child(model.getImagePath());
         GlideApp.with(context)
                 .load(storageReference)
                 .into(holder.image);
+
 
         holder.buttonEdit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,7 +77,7 @@ public class ItemsAdapter extends FirestoreRecyclerAdapter<Item, ItemsAdapter.It
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView name, price, dailyStock, currentStock;
+        public TextView name, price, dailyStock, currentStock, prepTime;
         public ImageView image;
         public ImageButton buttonEdit;
 
@@ -84,6 +88,7 @@ public class ItemsAdapter extends FirestoreRecyclerAdapter<Item, ItemsAdapter.It
             price = itemView.findViewById(R.id.price);
             dailyStock = itemView.findViewById(R.id.daily_stock);
             currentStock = itemView.findViewById(R.id.current_stock);
+            prepTime = itemView.findViewById(R.id.average_prep_time);
             image = itemView.findViewById(R.id.image);
             buttonEdit = itemView.findViewById(R.id.button_edit);
         }

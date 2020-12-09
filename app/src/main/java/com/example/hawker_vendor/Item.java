@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Item implements Parcelable {
-    private String id, name, imagePath, hawkerId;
-    private float price;
+    private String id, name, imagePath, hawkerId, hawkerName;
+    private float price, prepTime;
     private int dailyStock, currentStock;
 
     protected Item(Parcel in) {
@@ -19,10 +19,14 @@ public class Item implements Parcelable {
         name = in.readString();
         imagePath = in.readString();
         hawkerId = in.readString();
+        hawkerName = in.readString();
         price = in.readFloat();
+        prepTime = in.readFloat();
         dailyStock = in.readInt();
         currentStock = in.readInt();
     }
+
+    public Item() {}
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
         @Override
@@ -35,8 +39,6 @@ public class Item implements Parcelable {
             return new Item[size];
         }
     };
-
-    public Item() {}
 
     public String getId() {
         return id;
@@ -70,12 +72,28 @@ public class Item implements Parcelable {
         this.hawkerId = hawkerId;
     }
 
+    public String getHawkerName() {
+        return hawkerName;
+    }
+
+    public void setHawkerName(String hawkerName) {
+        this.hawkerName = hawkerName;
+    }
+
     public float getPrice() {
         return price;
     }
 
     public void setPrice(float price) {
         this.price = price;
+    }
+
+    public float getPrepTime() {
+        return prepTime;
+    }
+
+    public void setPrepTime(float prepTime) {
+        this.prepTime = prepTime;
     }
 
     public int getDailyStock() {
@@ -99,8 +117,10 @@ public class Item implements Parcelable {
 
         map.put("name", name);
         map.put("price", price);
+        map.put("prepTime", prepTime);
         map.put("imagePath", imagePath);
         map.put("hawkerId", hawkerId);
+        map.put("hawkerName", hawkerName);
         map.put("dailyStock", dailyStock);
         map.put("currentStock", currentStock);
 
@@ -114,7 +134,9 @@ public class Item implements Parcelable {
                 ", name='" + name + '\'' +
                 ", imagePath='" + imagePath + '\'' +
                 ", hawkerId='" + hawkerId + '\'' +
+                ", hawkerName='" + hawkerName + '\'' +
                 ", price=" + price +
+                ", prepTime=" + prepTime +
                 ", dailyStock=" + dailyStock +
                 ", currentStock=" + currentStock +
                 '}';
@@ -131,7 +153,9 @@ public class Item implements Parcelable {
         parcel.writeString(name);
         parcel.writeString(imagePath);
         parcel.writeString(hawkerId);
+        parcel.writeString(hawkerName);
         parcel.writeFloat(price);
+        parcel.writeFloat(prepTime);
         parcel.writeInt(dailyStock);
         parcel.writeInt(currentStock);
     }

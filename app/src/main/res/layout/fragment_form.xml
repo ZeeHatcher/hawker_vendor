@@ -85,7 +85,7 @@
         android:textSize="18sp"
         android:layout_marginTop="12dp"
         app:layout_constraintTop_toBottomOf="@id/label_price"
-        app:layout_constraintBottom_toTopOf="@id/button_cancel"
+        app:layout_constraintBottom_toTopOf="@id/label_cook_time"
         app:layout_constraintLeft_toLeftOf="@id/label_price"/>
 
     <EditText
@@ -100,13 +100,45 @@
         app:layout_constraintBottom_toBottomOf="@id/label_stock"
         app:layout_constraintLeft_toRightOf="@id/label_stock"/>
 
+    <TextView
+        android:id="@+id/label_cook_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_average_prep_time"
+        android:textSize="18sp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/label_stock"
+        app:layout_constraintBottom_toTopOf="@id/button_cancel"
+        app:layout_constraintLeft_toLeftOf="@id/label_stock"/>
+
+    <EditText
+        android:id="@+id/average_prep_time"
+        android:minWidth="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="0"
+        android:gravity="center"
+        android:inputType="numberDecimal"
+        app:layout_constraintTop_toTopOf="@id/label_cook_time"
+        app:layout_constraintBottom_toBottomOf="@id/label_cook_time"
+        app:layout_constraintLeft_toRightOf="@id/label_cook_time"/>
+
+    <TextView
+        android:id="@+id/suffix_minute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/minute"
+        app:layout_constraintTop_toTopOf="@id/average_prep_time"
+        app:layout_constraintBottom_toBottomOf="@id/average_prep_time"
+        app:layout_constraintLeft_toRightOf="@id/average_prep_time"/>
+
     <Button
         android:id="@+id/button_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/cancel"
         android:layout_marginTop="60dp"
-        app:layout_constraintTop_toBottomOf="@id/label_stock"
+        app:layout_constraintTop_toBottomOf="@id/label_cook_time"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/button_done"
