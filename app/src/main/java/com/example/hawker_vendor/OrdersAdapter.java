@@ -42,41 +42,47 @@ public class OrdersAdapter extends FirebaseRecyclerAdapter<Order, OrdersAdapter.
         holder.tvPrice.setText(String.format("%.2f", model.getTotal()));
 
         switch (model.getCompletion()) {
-            case 1:
-                holder.tvItem.setTextColor(ContextCompat.getColor(context, R.color.colorPositive));
+            case -1:
+                holder.tvItem.setTextColor(ContextCompat.getColor(context, R.color.colorTextPrimary));
+
+                holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        Log.d(TAG, "order click: " + model.toString());
+
+                        new MaterialAlertDialogBuilder(context)
+                                .setTitle(R.string.dialog_completion_title)
+                                .setMessage(R.string.dialog_completion_message)
+                                .setPositiveButton(R.string.complete, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        handler.setOrderCompletion(model.getId(), 0);
+                                    }
+                                })
+                                .setNegativeButton(R.string.reject, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        handler.setOrderCompletion(model.getId(), 1);
+                                    }
+                                })
+                                .setNeutralButton(R.string.cancel, null)
+                                .show();
+
+                        return true;
+                    }
+                });
                 break;
 
-            case -1:
+            case 0:
+                holder.tvItem.setTextColor(ContextCompat.getColor(context, R.color.colorPositive));
+                holder.itemView.setOnLongClickListener(null);
+                break;
+
+            case 1:
                 holder.tvItem.setTextColor(ContextCompat.getColor(context, R.color.colorNegative));
+                holder.itemView.setOnLongClickListener(null);
                 break;
         }
-
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                Log.d(TAG, "order click: " + model.toString());
-
-                new MaterialAlertDialogBuilder(context)
-                        .setTitle(R.string.dialog_completion_title)
-                        .setMessage(R.string.dialog_completion_message)
-                        .setPositiveButton(R.string.complete, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                handler.setOrderCompletion(model.getId(), 1);
-                            }
-                        })
-                        .setNegativeButton(R.string.reject, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                handler.setOrderCompletion(model.getId(), -1);
-                            }
-                        })
-                        .setNeutralButton(R.string.cancel, null)
-                        .show();
-
-                return true;
-            }
-        });
     }
 
     @NonNull

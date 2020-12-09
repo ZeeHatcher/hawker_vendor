@@ -15,6 +15,7 @@ import android.widget.Button;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.places.api.model.Place;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,7 +38,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
     private FirebaseAuth auth;
     private TextInputEditText etName, etStore;
     private TextInputLayout tlName, tlStore;
-    private String storeId;
+    private Place place;
 
     public SetupFragment() {
         // Required empty public constructor
@@ -69,16 +70,14 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_setup, container, false);
 
+        Button buttonConfirm = view.findViewById(R.id.button_confirm);
         etName = view.findViewById(R.id.stall_name_edit_text);
         etStore = view.findViewById(R.id.store_edit_text);
-
         tlName = view.findViewById(R.id.stall_name_input_text);
         tlStore = view.findViewById(R.id.store_input_text);
 
-        Button buttonConfirm = view.findViewById(R.id.button_confirm);
-
-        etStore.setOnClickListener(this);
         buttonConfirm.setOnClickListener(this);
+        etStore.setOnClickListener(this);
 
         return view;
     }
@@ -104,7 +103,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                     isValid = false;
                 }
 
-                if (storeId == null) {
+                if (place == null) {
                     tlStore.setError(getString(R.string.error_store_empty));
                     isValid = false;
                 }
@@ -112,7 +111,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 if (!isValid) return;
 
                 Map<String, Object> docData = new HashMap<>();
-                docData.put("storeId", storeId);
+                docData.put("storeId", place.getId());
                 docData.put("name", etName.getText().toString());
                 docData.put("isOpen", false);
 
@@ -140,8 +139,9 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             Log.d(TAG, "onActivityResult:success");
 
-            storeId = data.getStringExtra(MapsActivity.KEY_ID);
-            etStore.setText(data.getStringExtra(MapsActivity.KEY_NAME));
+            place = data.getExtras().getParcelable(MapsActivity.KEY_PLACE);
+            etStore.setText(place.getName());
         }
     }
+
 }

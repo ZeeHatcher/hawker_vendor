@@ -14,6 +14,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -22,13 +23,22 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PointOfInterest;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FetchPlaceResponse;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnPoiClickListener, View.OnClickListener {
 
-    public static final String KEY_NAME = "storeName";
-    public static final String KEY_ID = "storeId";
+    public static final String KEY_PLACE = "place";
 
     private static final int REQUEST_PERMISSIONS = 1;
     private static final String TAG = "Maps";
@@ -108,10 +118,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onClick(View view) {
         Log.d(TAG, "set location: " + poi.placeId + " " + poi.name);
 
-        Intent intent = new Intent();
-        intent.putExtra(KEY_ID, poi.placeId);
-        intent.putExtra(KEY_NAME, poi.name);
-        setResult(RESULT_OK, intent);
-        finish();
+        Places.initialize(this, getString(R.string.google_maps_key));
+        PlacesClient placesClient = Places.createClient(this);
+
+        List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.TYPES);
+        FetchPlaceRequest request = FetchPlaceRequest.newInstance(poi.placeId, placeFields);
+
+        placesClient.fetchPlace(request)
+                .addOnSuccessListener(new OnSuccessListener<FetchPlaceResponse>() {
+                    @Override
+                    public void onSuccess(FetchPlaceResponse fetchPlaceResponse) {
+                        Place place = fetchPlaceResponse.getPlace();
+
+                        if (!place.getTypes().contains(Place.Type.FOOD)) {
+                            Toast.makeText(MapsActivity.this, R.string.message_invalid_store, Toast.LENGTH_SHORT)
+                                    .show();
+
+                            return;
+                        }
+
+                        Bundle extras = new Bundle();
+                        extras.putParcelable(KEY_PLACE, place);
+
+                        Intent intent = new Intent();
+                        intent.putExtras(extras);
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "fetchPlace:fail", e);
+                    }
+                });
     }
+
 }
