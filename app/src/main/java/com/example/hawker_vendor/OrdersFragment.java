@@ -27,6 +27,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Calendar;
@@ -158,12 +159,13 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
                                     - Completed
                                     - Not completed/Declined
                          */
-                        int countComplete = 0;
-                        int countIncomplete = 0;
-                        int totalSold = 0;
+                        float countComplete = 0;
+                        float countIncomplete = 0;
+                        float totalSold = 0;
                         float totalRevenue = 0f;
+                        Map<String, Object> docData = new HashMap<>();
                         Map<String, Float> itemsRevenue = new HashMap<>();
-                        Map<String, Integer> itemsSold = new HashMap<>();
+                        Map<String, Float> itemsSold = new HashMap<>();
 
                         for (DataSnapshot s : snapshot.getChildren()) {
                             Order order = s.getValue(Order.class);
@@ -173,18 +175,11 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
                                 int qty = order.getItemQty();
                                 String itemName = order.getItemName();
 
-//                                if (!itemRevenue.containsKey(itemName)) {
-//                                    itemRevenue.put(itemName, 0f);
-//                                }
-//                                if (!itemSold.containsKey(itemName)) {
-//                                    itemSold.put(itemName, 0);
-//                                }
-
                                 totalRevenue += revenue;
                                 itemsRevenue.put(itemName, itemsRevenue.getOrDefault(itemName, 0f) + revenue);
 
-                                itemsSold.put(itemName, itemsSold.getOrDefault(itemName, 0) + qty);
                                 totalSold += qty;
+                                itemsSold.put(itemName, itemsSold.getOrDefault(itemName, 0f) + qty);
 
                                 countComplete++;
                             } else {
@@ -192,7 +187,6 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
                             }
                         }
 
-                        Map<String, Object> docData = new HashMap<>();
                         docData.put("countOrderComplete", countComplete);
                         docData.put("countOrderIncomplete", countIncomplete);
                         docData.put("totalRevenue", totalRevenue);
@@ -200,7 +194,6 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
                         docData.put("totalSold", totalSold);
                         docData.put("itemsSold", itemsSold);
                         docData.put("createdAt", new Timestamp(Calendar.getInstance().getTime()));
-
                         firestoreHandler.addStat(auth.getCurrentUser().getUid(), docData)
                                 .addOnFailureListener(new OnFailureListener() {
                                     @Override
@@ -208,6 +201,8 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
                                         Log.w(TAG, "addStat:fail", e);
                                     }
                                 });
+
+                        updateHawkerAggregateStats(docData);
 
                         deleteOrders();
                     }
@@ -217,7 +212,29 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
 
                     }
                 });
+    }
 
+    private void updateHawkerAggregateStats(Map<String, Object> stats) {
+        stats.remove("createdAt");
+
+        Map<String, Object> docData = new HashMap<>();
+        docData.put("stats.countOrderComplete", FieldValue.increment((float) stats.get("countOrderComplete")));
+        docData.put("stats.countOrderIncomplete", FieldValue.increment((float) stats.get("countOrderIncomplete")));
+        docData.put("stats.totalRevenue", FieldValue.increment((float) stats.get("totalRevenue")));
+        docData.put("stats.totalSold", FieldValue.increment((float) stats.get("totalSold")));
+        for (String field : new String[] { "itemsRevenue", "itemsSold" }) {
+            for (Map.Entry<String, Float> entry : ((Map<String, Float>) stats.get(field)).entrySet()) {
+                docData.put("stats." + field + "." + entry.getKey(), FieldValue.increment((float) entry.getValue()));
+            }
+        }
+
+        firestoreHandler.updateHawker(auth.getCurrentUser().getUid(), docData)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "addStat:fail", e);
+                    }
+                });
     }
 
     private void deleteOrders() {

@@ -64,4 +64,10 @@
     <string name="message_invalid_store">The selected location is not a store.</string>
     <string name="label_average_prep_time">Average Prep Time:</string>
     <string name="minute">minute(s)</string>
+    <string name="stats">Statistics</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="overall">Overall</string>
+    <string name="previous_session">Previous Session</string>
+    <string name="total_revenue">Total Revenue</string>
 </resources>

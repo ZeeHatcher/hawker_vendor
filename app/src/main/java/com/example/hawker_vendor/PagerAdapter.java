@@ -21,7 +21,7 @@ public class PagerAdapter extends FragmentStateAdapter {
                 return ManageFragment.newInstance();
 
             case 2:
-                return SettingsFragment.newInstance();
+                return StatsFragment.newInstance();
 
             default:
                 return SubFragment.newInstance();

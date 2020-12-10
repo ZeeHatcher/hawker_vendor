@@ -11,8 +11,8 @@
         android:icon="@drawable/ic_baseline_fastfood_24"
         android:title="@string/manage"/>
     <item
-        android:id="@+id/page_settings"
+        android:id="@+id/page_stats"
         android:enabled="true"
-        android:icon="@drawable/ic_baseline_settings_24"
-        android:title="@string/settings"/>
+        android:icon="@drawable/ic_baseline_bar_chart"
+        android:title="@string/stats"/>
 </menu>

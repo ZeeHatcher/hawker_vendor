@@ -76,7 +76,7 @@ public class PagerFragment extends Fragment implements BottomNavigationView.OnNa
                 viewPager.setCurrentItem(1);
                 return true;
 
-            case R.id.page_settings:
+            case R.id.page_stats:
                 viewPager.setCurrentItem(2);
                 return true;
         }
