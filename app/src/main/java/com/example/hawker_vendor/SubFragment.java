@@ -15,11 +15,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +38,7 @@ public class SubFragment extends Fragment {
     private static final String TAG = "Sub";
 
     private FirebaseAuth auth;
+    private FirestoreHandler firestoreHandler;
 
     public SubFragment() {
         // Required empty public constructor
@@ -56,6 +62,7 @@ public class SubFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         auth = FirebaseAuth.getInstance();
+        firestoreHandler = FirestoreHandler.getInstance();
     }
 
     @Override
@@ -64,8 +71,7 @@ public class SubFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_sub, container, false);
 
-        FirestoreHandler.getInstance()
-                .getHawker(auth.getCurrentUser().getUid())
+        firestoreHandler.getHawker(auth.getCurrentUser().getUid())
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -91,8 +97,7 @@ public class SubFragment extends Fragment {
         Map<String, Object> docData = new HashMap<>();
         docData.put("isOpen", isOpen);
 
-        FirestoreHandler.getInstance()
-                .updateHawker(auth.getCurrentUser().getUid(), docData)
+        firestoreHandler.updateHawker(auth.getCurrentUser().getUid(), docData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -106,6 +111,7 @@ public class SubFragment extends Fragment {
                     }
                 });
     }
+
 
     private void replaceFragment(boolean isOpen) {
         getChildFragmentManager()

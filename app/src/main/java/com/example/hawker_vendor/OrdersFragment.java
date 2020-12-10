@@ -20,6 +20,7 @@ import com.firebase.ui.database.SnapshotParser;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,6 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -130,7 +132,7 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 ((SubFragment) getParentFragment()).setStallOpen(false);
 
-                                deleteOrders();
+                                saveStats();
                                 restock();
                             }
                         })
@@ -139,6 +141,83 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
 
                 break;
         }
+    }
+
+    private void saveStats() {
+        firebaseHandler.getOrders(auth.getCurrentUser().getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        /*
+                            Save data:
+                                - Total revenue
+                                    - Item revenue
+                                - Total items sold
+                                    - Item quantity
+                                - Total orders
+                                    - Completed
+                                    - Not completed/Declined
+                         */
+                        int countComplete = 0;
+                        int countIncomplete = 0;
+                        int totalSold = 0;
+                        float totalRevenue = 0f;
+                        Map<String, Float> itemsRevenue = new HashMap<>();
+                        Map<String, Integer> itemsSold = new HashMap<>();
+
+                        for (DataSnapshot s : snapshot.getChildren()) {
+                            Order order = s.getValue(Order.class);
+
+                            if (order.getCompletion() == 0) {
+                                float revenue = order.getTotal();
+                                int qty = order.getItemQty();
+                                String itemName = order.getItemName();
+
+//                                if (!itemRevenue.containsKey(itemName)) {
+//                                    itemRevenue.put(itemName, 0f);
+//                                }
+//                                if (!itemSold.containsKey(itemName)) {
+//                                    itemSold.put(itemName, 0);
+//                                }
+
+                                totalRevenue += revenue;
+                                itemsRevenue.put(itemName, itemsRevenue.getOrDefault(itemName, 0f) + revenue);
+
+                                itemsSold.put(itemName, itemsSold.getOrDefault(itemName, 0) + qty);
+                                totalSold += qty;
+
+                                countComplete++;
+                            } else {
+                                countIncomplete++;
+                            }
+                        }
+
+                        Map<String, Object> docData = new HashMap<>();
+                        docData.put("countOrderComplete", countComplete);
+                        docData.put("countOrderIncomplete", countIncomplete);
+                        docData.put("totalRevenue", totalRevenue);
+                        docData.put("itemsRevenue", itemsRevenue);
+                        docData.put("totalSold", totalSold);
+                        docData.put("itemsSold", itemsSold);
+                        docData.put("createdAt", new Timestamp(Calendar.getInstance().getTime()));
+
+                        firestoreHandler.addStat(auth.getCurrentUser().getUid(), docData)
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w(TAG, "addStat:fail", e);
+                                    }
+                                });
+
+                        deleteOrders();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
     }
 
     private void deleteOrders() {
@@ -181,4 +260,5 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
                     }
                 });
     }
+
 }

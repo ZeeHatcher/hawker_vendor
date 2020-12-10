@@ -17,6 +17,7 @@ public class FirestoreHandler {
     private static final String COL_HAWKERS = "hawkers";
     private static final String COL_ITEMS = "items";
     private static final String KEY_CURRENT_STOCK = "currentStock";
+    private static final String COL_STATS = "stats";
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -88,6 +89,21 @@ public class FirestoreHandler {
 
     public Task<QuerySnapshot> getHawkerItems(String uid) {
         return refHawkerItems(uid)
+                .get();
+    }
+
+    public CollectionReference refHawkerStats(String uid) {
+        return refHawker(uid)
+                .collection(COL_STATS);
+    }
+
+    public Task<DocumentReference> addStat(String uid, Map<String, Object> data) {
+        return refHawkerStats(uid)
+                .add(data);
+    }
+
+    public Task<QuerySnapshot> getStats(String uid) {
+        return refHawkerStats(uid)
                 .get();
     }
 }
