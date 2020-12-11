@@ -70,4 +70,6 @@
     <string name="overall">Overall</string>
     <string name="previous_session">Previous Session</string>
     <string name="total_revenue">Total Revenue</string>
+    <string name="channel_name">Hawker Orders</string>
+    <string name="channel_description">Updates to the orders in the Hawker App</string>
 </resources>

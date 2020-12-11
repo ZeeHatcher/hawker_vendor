@@ -1,9 +1,13 @@
 package com.example.hawker_vendor;
 
+import android.app.PendingIntent;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +38,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.hawker_vendor.MainActivity2.CHANNEL_ID;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link OrdersFragment#newInstance} factory method to
@@ -42,6 +48,8 @@ import java.util.Map;
 public class OrdersFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "Orders";
+    private static final int REQUEST_CODE = 1;
+
     private FirebaseAuth auth;
     private FirebaseHandler firebaseHandler;
     private FirestoreHandler firestoreHandler;
@@ -112,6 +120,26 @@ public class OrdersFragment extends Fragment implements View.OnClickListener {
         super.onStart();
 
         adapter.startListening();
+
+        firebaseHandler.getOrders(auth.getCurrentUser().getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
+                                .setSmallIcon(R.drawable.ic_baseline_storefront)
+                                .setContentTitle("Updated Orders")
+                                .setContentText("There are new changes to the order list.")
+                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+                        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
+                        notificationManager.notify(0, builder.build());
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     @Override
