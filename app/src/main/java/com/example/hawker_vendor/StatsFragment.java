@@ -89,6 +89,8 @@ public class StatsFragment extends Fragment {
         chart.setDragEnabled(true);
         chart.setScaleEnabled(true);
         chart.setPinchZoom(true);
+        chart.getXAxis().setEnabled(false);
+        chart.getAxisRight().setEnabled(false);
 
         return view;
     }
@@ -130,6 +132,12 @@ public class StatsFragment extends Fragment {
                                 double incompleteOrders = (double) stats.get("countOrderIncomplete");
                                 tvTotalOrders.setText(String.format("Total Orders: %.0f", completeOrders + incompleteOrders));
                                 tvDetailedOrders.setText(String.format("Completed: %.0f\nNot Completed: %.0f", completeOrders, incompleteOrders));
+                            } else {
+                                tvTotalRevenue.setText("RM0.00");
+                                tvTotalSold.setText("Total Items Sold: 0");
+                                tvTotalOrders.setText("Total Order: 0");
+                                tvDetailedSold.setText("-\n");
+                                tvDetailedOrders.setText("-\n");
                             }
                         } else {
                             Log.d(TAG, "Current data: null");
@@ -157,7 +165,10 @@ public class StatsFragment extends Fragment {
                                 values.add(new Entry(i,  doc.get("totalRevenue", Float.class)));
                             }
 
-                            setData(values);
+                            if (!values.isEmpty()) {
+                                setData(values);
+                                chart.animateX(250);
+                            }
                         } else {
                             Log.d(TAG, "Current data: null");
                         }
@@ -197,11 +208,7 @@ public class StatsFragment extends Fragment {
             set1.setFormLineDashEffect(new DashPathEffect(new float[]{10f, 5f}, 0f));
             set1.setFormSize(15.f);
 
-            // text size of values
-            set1.setValueTextSize(9f);
-
-            // draw selection line as dashed
-            set1.enableDashedHighlightLine(10f, 5f, 0f);
+            set1.setDrawValues(false);
 
             ArrayList<ILineDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1); // add the data sets
