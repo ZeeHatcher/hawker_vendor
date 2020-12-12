@@ -5,11 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -20,12 +20,12 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity2 extends AppCompatActivity implements NavigationHost, WidgetManager, MaterialToolbar.OnMenuItemClickListener {
 
-    public static final String CHANNEL_ID = "com.example.hawker_vendor.NOTIFICATION";
-
     private static final String TAG = "Main2";
+    private static final int JOB_ID = 0;
 
     private MaterialToolbar appBar;
     private FirebaseAuth auth;
+    private JobScheduler jobScheduler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,11 +33,16 @@ public class MainActivity2 extends AppCompatActivity implements NavigationHost, 
         setContentView(R.layout.activity_main2);
 
         auth = FirebaseAuth.getInstance();
+        jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
 
         appBar = findViewById(R.id.top_app_bar);
         appBar.setOnMenuItemClickListener(this);
 
-        createNotificationChannel();
+        if (auth.getCurrentUser() == null) {
+            signOut();
+        }
+
+        scheduleJob();
 
         navigateTo(PagerFragment.newInstance(), false);
     }
@@ -63,8 +68,7 @@ public class MainActivity2 extends AppCompatActivity implements NavigationHost, 
                         .setPositiveButton(R.string.dialog_logout_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                auth.signOut();
-                                navigateActivity();
+                                signOut();
                             }
                         })
                         .setNegativeButton(R.string.dialog_logout_no, null)
@@ -111,16 +115,19 @@ public class MainActivity2 extends AppCompatActivity implements NavigationHost, 
         appBar.getMenu().findItem(id).setVisible(isVisible);
     }
 
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_LOW;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
+    private void scheduleJob() {
+        ComponentName notificationJobService = new ComponentName(getPackageName(), NotificationJobService.class.getName());
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+        JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, notificationJobService);
+        JobInfo jobInfo = builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+
+        jobScheduler.schedule(jobInfo);
+    }
+
+    private void signOut() {
+        jobScheduler.cancelAll();
+        auth.signOut();
+        navigateActivity();
     }
 }

@@ -116,15 +116,23 @@ public class StatsFragment extends Fragment {
 
                                 tvTotalRevenue.setText(String.format("RM%.2f", (double) stats.get("totalRevenue")));
                                 String detailedRevenue = "";
-                                for (Map.Entry<String, Float> entry : itemsRevenue.entrySet()) {
-                                    detailedRevenue += String.format("%s: RM%.2f\n", entry.getKey(), entry.getValue());
+                                if (itemsRevenue != null) {
+                                    for (Map.Entry<String, Float> entry : itemsRevenue.entrySet()) {
+                                        detailedRevenue += String.format("%s: RM%.2f\n", entry.getKey(), entry.getValue());
+                                    }
+                                } else {
+                                    detailedRevenue = "-";
                                 }
                                 tvDetailedRevenue.setText(detailedRevenue);
 
                                 tvTotalSold.setText(String.format("Total Items Sold: %.0f", (double) stats.get("totalSold")));
                                 String detailedSold = "";
-                                for (Map.Entry<String, Float> entry : itemsSold.entrySet()) {
-                                    detailedSold += String.format("%s: %.0f\n", entry.getKey(), entry.getValue());
+                                if (itemsSold != null) {
+                                    for (Map.Entry<String, Float> entry : itemsSold.entrySet()) {
+                                        detailedSold += String.format("%s: %.0f\n", entry.getKey(), entry.getValue());
+                                    }
+                                } else {
+                                    detailedSold = "-";
                                 }
                                 tvDetailedSold.setText(detailedSold);
 
